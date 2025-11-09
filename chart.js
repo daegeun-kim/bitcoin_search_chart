@@ -3,8 +3,11 @@
 
   
   // ---------- Create containers ----------
-  const body = d3sel("body");
-  const wrap = body.append("div").attr("id", "wrap");
+  // Prefer placing the chart inside the existing <div class="chart"> in index.html.
+  // If that element isn't present, fall back to appending to the body.
+  let container = d3sel("div.chart");
+  if (container.empty()) container = d3sel("body");
+  const wrap = container.append("div").attr("id", "wrap");
 
   const title = wrap.append("h2").text("Bitcoin Price vs Search Volume — Daily Trace");
 
@@ -21,10 +24,11 @@
 
 
   // ---------- Dimensions ----------
-  const W = 900, H = 560;
-  const M = { top: 36, right: 24, bottom: 60, left: 76 };
-  const innerW = W - M.left - M.right;
-  const innerH = H - M.top - M.bottom;
+  // Use margins to define the graph area within the SVG viewBox
+  const M = { top: 25, right: 40, bottom: 50, left: 40 };
+  const viewBox = svg.node().viewBox.baseVal;
+  const innerW = viewBox.width - M.left - M.right;
+  const innerH = viewBox.height - M.top - M.bottom;
 
 
 
@@ -56,7 +60,7 @@
       traceClass: 'traces traces2',
       curveClass: 'curve curve2',
       cursorClass: 'cursor cursor2',
-      baseOpacity: 0.4
+      baseOpacity: 0.5
     },
     {
       id: 3,
@@ -64,7 +68,7 @@
       traceClass: 'traces traces3',
       curveClass: 'curve curve3',
       cursorClass: 'cursor cursor3',
-      baseOpacity: 0.4
+      baseOpacity: 0.5
     },
     {
       id: 4,
@@ -72,7 +76,7 @@
       traceClass: 'traces traces4',
       curveClass: 'curve curve4',
       cursorClass: 'cursor cursor4',
-      baseOpacity: 0.4
+      baseOpacity: 0.5
     }
   ];
 
@@ -117,7 +121,7 @@
   const xPad = (xExtent[1] - xExtent[0]) * 0.06 || 1;
   const yPad = (yExtent[1] - yExtent[0]) * 0.08 || 1;
 
-  const yMin = 20; 
+  const yMin = 10; 
   const yMax = 8000; 
   const xMin = 100;   
   const xMax = 110000;
@@ -142,7 +146,8 @@
   gx.call(d3.axisBottom(x).ticks(8).tickSizeOuter(0));
   gy.call(d3.axisLeft(y).ticks(8).tickSizeOuter(0));
 
-  gridX.call(d3.axisBottom(x).ticks(8).tickSize(innerH).tickFormat(""));
+  // draw grid lines upward into the chart area; use negative tickSize so lines do not extend below the x axis
+  gridX.call(d3.axisBottom(x).ticks(8).tickSize(-innerH).tickFormat(""));
   gridY.call(d3.axisLeft(y).ticks(8).tickSize(-innerW).tickFormat(""));
 
   // Create line generators for each dataset
@@ -183,7 +188,7 @@
           if (isLastDate) return 0.2;
           const segEnd = j + 1;
           const age = index - segEnd;
-          return Math.max(0, ds.baseOpacity - age * 0.002);
+          return Math.max(0.05, ds.baseOpacity - age * 0.002);
         }),
       update => update
         .attr("d", makeCurves[i])
@@ -191,7 +196,7 @@
           if (isLastDate) return 0.2;
           const segEnd = j + 1;
           const age = index - segEnd;
-          return Math.max(0, ds.baseOpacity - age * 0.002);
+          return Math.max(0.05, ds.baseOpacity - age * 0.002);
         }),
       exit => exit.remove()
     );
@@ -230,6 +235,47 @@
 
   // Initial render
   render(0);
+
+  // ---------- Wheel / scroll interaction ----------
+  // Use wheel scrolling to move the time forward/backward when not over the storyline.
+  // Allow the storyline element to scroll normally when the pointer is over it.
+  // Implement accumulation + sensitivity so touchpad and mouse wheel move time faster.
+  const WHEEL_THRESHOLD = 36; // pixels of wheel delta per step
+  const WHEEL_SENSITIVITY = 2; // multiplier for how many indices per step
+  let wheelAccum = 0;
+
+  function onWheelMove(e) {
+    // If pointer is inside the storyline, let that element handle scrolling
+    if (e.target && e.target.closest && e.target.closest('.storyline')) {
+      return; // do not intercept
+    }
+    // prevent the default page scroll
+    e.preventDefault();
+
+    // accumulate raw deltaY (works better for smooth touchpads)
+    wheelAccum += e.deltaY;
+
+    // compute number of threshold-crossings
+    const crosses = Math.trunc(wheelAccum / WHEEL_THRESHOLD);
+    if (crosses === 0) return; // not enough movement yet
+
+    // apply sensitivity multiplier
+    const step = crosses * WHEEL_SENSITIVITY;
+
+    // reset accumulation keeping the remainder
+    wheelAccum = wheelAccum - crosses * WHEEL_THRESHOLD;
+
+    let i = +scrub.property('value');
+    i = Math.max(0, Math.min(data.length - 1, i + step));
+    if (i !== +scrub.property('value')) {
+      scrub.property('value', i);
+      render(i);
+    }
+  }
+
+  // Attach wheel listener to the window so it works without page scrolling.
+  // Use passive: false so we can preventDefault.
+  window.addEventListener('wheel', onWheelMove, { passive: false });
 
 
 

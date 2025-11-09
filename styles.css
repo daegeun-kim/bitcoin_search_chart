@@ -1,3 +1,80 @@
+/* Dark mode base colors */
+body {
+    background: #292b30; /* deep dark blue */
+    color: #ffffff;      /* default text color */
+    margin: 0;
+    overflow: hidden; /* disable page scrolling; chart will handle scroll-to-time */
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* container: horizontal split (chart 70% / storyline 30%) */
+.container {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    gap: 24px;
+    padding: 10px;
+    box-sizing: border-box;
+}
+.chart {
+    flex: 0 0 70%; /* take up 70% of available width */
+    box-sizing: border-box;
+    padding-right: 5px;
+    min-width: 320px;
+}
+
+/* Make the SVG fill the available vertical space inside the chart column */
+.chart svg {
+    width: 100%;
+    height: calc(100vh - 170px); /* leave room for padding, title and controls */
+    display: block;
+}
+
+.storyline {
+    flex: 0 0 30%; /* take up 30% of available width */
+    padding: 60px 0 30px;
+    font-size: 17px;
+    box-sizing: border-box;
+    padding-left: 5px;
+    max-width: 420px;
+    line-height: 1.6;
+    color: #f3f7ff; /* light text for readability */
+    overflow-y: auto;
+    max-height: calc(100vh - 80px);
+}
+
+/* Responsive: stack vertically on narrow viewports */
+@media (max-width: 900px) {
+    .container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .chart, .storyline {
+        flex: none;
+        width: 100%;
+        max-width: none;
+        padding: 0 8px;
+    }
+    .storyline {
+        max-height: none;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* Container Layout */
 #wrap {
     max-width: 1100px;
@@ -13,7 +90,7 @@ h2 {
 
 /* Chart SVG */
 #chart {
-    background: #fbfcffff;
+    background: #1b1d22; /* dark blue panel */
     border-radius: 12px;
 }
 
@@ -45,38 +122,42 @@ h2 {
 /* Date Label */
 #dateLabel {
     text-align: right;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-    color: #9aa4b2;
+    font-family: inherit;
+    color: rgba(255,255,255,0.85);
 }
 
 /* Chart Axis and Labels */
 .x text,
 .y text {
-    fill: #000000ff;
+    fill: #ffffff;
     font: 12px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
 }
 
 .x path,
+.y path {
+    stroke: rgba(105, 105, 105, 0.95);
+    stroke-width: 0.22;
+}
+
 .x line,
-.y path,
 .y line {
-    stroke: #000000ff;
+    stroke: rgba(88, 88, 88, 0.9);
+    stroke-width: 0.3; 
 }
 
 .gridX line,
 .gridY line {
-    stroke: #1c2230;
-    stroke-width: 0.3;
+    stroke: rgba(255,255,255,0.12);
+    stroke-width: 0.5;
 }
 
-/* Chart Elements */
 .axis-label {
-    fill: #9aa4b2;
-    font: 12px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    fill: rgba(255, 255, 255, 0.9);
+    font: 13px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
 }
 
 .traces {
-    mix-blend-mode: multiply;
+    mix-blend-mode: normal;
 }
 
 .curve {
@@ -87,8 +168,8 @@ h2 {
 }
 
 .curve1 {
-    stroke: #ff0000ff;
-    opacity: 0.2;
+    stroke: #ff0000;
+    stroke-opacity: 1;
 }
 
 .cursor {
@@ -104,16 +185,16 @@ h2 {
 /* Alternate (second) series styles */
 .curve2 {
     fill: none;
-    stroke: #0257df;
-    stroke-width: 3;
+    stroke: #348ee2;
+    stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
-    opacity: 0.18;
+    stroke-opacity: 1;
 }
 
 .cursor2 {
     fill: #7dd3fc;
-    stroke: #111827;
+    stroke: #0b1726; /* darker stroke for contrast */
     stroke-width: 1.25;
     opacity: 0;
 }
@@ -121,16 +202,16 @@ h2 {
 /* Third series styles */
 .curve3 {
     fill: none;
-    stroke: #187700; /* green */
-    stroke-width: 3;
+    stroke: #44992f; /* green */
+    stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
-    opacity: 0.18;
+    stroke-opacity: 1;
 }
 
 .cursor3 {
-    fill: #3ce736; /* light green */
-    stroke: #025e28;
+    fill: #78d475; /* light green */
+    stroke: #042a14;
     stroke-width: 1.25;
     opacity: 0;
 }
@@ -138,16 +219,16 @@ h2 {
 /* Fourth series styles */
 .curve4 {
     fill: none;
-    stroke: #ff0000; /* purple */
-    stroke-width: 3;
+    stroke: #f32929; /* purple */
+    stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
-    opacity: 0.18;
+    stroke-opacity: 1;
 }
 
 .cursor4 {
     fill: #fc5f5f; /* light purple */
-    stroke: #000000;
+    stroke: #1a0b0b;
     stroke-width: 1.25;
     opacity: 0;
 }
