@@ -40,21 +40,39 @@
   g.append("text").attr("y", innerH + 44).attr("x", -10).attr("text-anchor", "start").text("BTC price (USD)")
     .attr("class", "axis-label");
 
-  // Dataset configurations
+  // Dataset configurations (four series: volume1, volume2, volume3, volume4)
   const datasets = [
-    { 
-      id: 1,
-      volumeField: 'volume1',
-      traceClass: 'traces traces1',
-      curveClass: 'curve curve1',
-      cursorClass: 'cursor cursor1'
-    },
+    // { 
+    //   id: 1,
+    //   volumeField: 'volume1',
+    //   traceClass: 'traces traces1',
+    //   curveClass: 'curve curve1',
+    //   cursorClass: 'cursor cursor1',
+    //   baseOpacity: 0.4
+    // },
     { 
       id: 2,
       volumeField: 'volume2',
       traceClass: 'traces traces2',
       curveClass: 'curve curve2',
-      cursorClass: 'cursor cursor2'
+      cursorClass: 'cursor cursor2',
+      baseOpacity: 0.4
+    },
+    {
+      id: 3,
+      volumeField: 'volume3',
+      traceClass: 'traces traces3',
+      curveClass: 'curve curve3',
+      cursorClass: 'cursor cursor3',
+      baseOpacity: 0.4
+    },
+    {
+      id: 4,
+      volumeField: 'volume4',
+      traceClass: 'traces traces4',
+      curveClass: 'curve curve4',
+      cursorClass: 'cursor cursor4',
+      baseOpacity: 0.4
     }
   ];
 
@@ -73,12 +91,14 @@
 
 
   // ---------- Load data ----------
-  let data = await d3.csv("btc_data_daily.csv", d3.autoType);
+  let data = await d3.csv("btc_data_daily_scaled.csv", d3.autoType);
   data = data.map(d => ({
     date: d.date instanceof Date ? d.date : new Date(d.date),
     price: +d.close,
     volume1: +d.bitcoin,
-    volume2: d.bitcoin_price
+    volume2: d.bitcoin_price,
+    volume3: d.nft != null ? +d.nft : NaN,
+    volume4: d.blockchain != null ? +d.blockchain : NaN
   })).filter(d => Number.isFinite(d.price) && Number.isFinite(d.volume1) && d.date)
     .sort((a, b) => a.date - b.date);
 
@@ -97,23 +117,23 @@
   const xPad = (xExtent[1] - xExtent[0]) * 0.06 || 1;
   const yPad = (yExtent[1] - yExtent[0]) * 0.08 || 1;
 
-  const xMin = 40; 
-  const xMax = 5000; 
-  const yMin = 200;   
-  const yMax = 110000;
+  const yMin = 20; 
+  const yMax = 8000; 
+  const xMin = 100;   
+  const xMax = 110000;
 
   // const x = d3.scaleLinear()
   //   .domain([xMin, xMax])
   //   .range([0, innerW]);
 
   const x = d3.scaleLog()
-  .domain([yMin, yMax])
+  .domain([xMin, xMax])
   .range([0, innerW])
   .base(10)
   .clamp(true); 
 
   const y = d3.scaleLog()
-  .domain([xMin, xMax])
+  .domain([yMin, yMax])
   .range([innerH, 0])
   .base(10)
   .clamp(true); 
@@ -140,12 +160,7 @@
 
   const fmtDate = d3.timeFormat("%Y-%m-%d");
   function updateLabel(d) {
-    if (!d) {
-      dateLabel.text("—");
-      return;
-    }
-    const volumes = datasets.map(ds => `vol${ds.id} ${d[ds.volumeField]}`).join(" · ");
-    dateLabel.text(`${fmtDate(d.date)} — $${d3.format(",")(Math.round(d.price))} · ${volumes}`);
+    dateLabel.text(d ? fmtDate(d.date) : "—");
   }
 
   function render(index) {
@@ -155,14 +170,29 @@
     return data.slice(start, i + 1);
   });
 
+  const isLastDate = data[index]?.date?.getTime() === new Date('2024-12-31').getTime();
+
   // Render all datasets
   datasets.forEach((ds, i) => {
     const segs = traces[i].selectAll("path").data(windows);
     segs.join(
       enter => enter.append("path")
         .attr("class", ds.curveClass)
-        .attr("d", makeCurves[i]),
-      update => update.attr("d", makeCurves[i]),
+        .attr("d", makeCurves[i])
+        .style("opacity", (d, j) => {
+          if (isLastDate) return 0.2;
+          const segEnd = j + 1;
+          const age = index - segEnd;
+          return Math.max(0, ds.baseOpacity - age * 0.002);
+        }),
+      update => update
+        .attr("d", makeCurves[i])
+        .style("opacity", (d, j) => {
+          if (isLastDate) return 0.2;
+          const segEnd = j + 1;
+          const age = index - segEnd;
+          return Math.max(0, ds.baseOpacity - age * 0.002);
+        }),
       exit => exit.remove()
     );
   });
@@ -211,21 +241,26 @@
     scrub.attr("disabled", true);
 
     let i = +scrub.property("value");
+    // advance one day every 500ms; use render() to draw safe segments
     timer = d3.interval(() => {
       if (i >= data.length - 1) { stop(); return; }
       const next = i + 1;
-      animateStep(i, next, 260);
       i = next;
       scrub.property("value", i);
+      // render the chart up to next index (safe, does not rely on external undefined vars)
+      render(i);
       const d = data[i];
-      // Update all cursors
-      datasets.forEach((ds, i) => {
-        cursors[i]
+      // animate cursors smoothly to their new positions
+      datasets.forEach((ds, idx) => {
+        cursors[idx]
+          .transition()
+          .duration(450)
+          .ease(d3.easeCubicOut)
           .attr("cx", x(d.price))
           .attr("cy", y(d[ds.volumeField]));
       });
-      updateLabel(d);
-    }, 280);
+      // updateLabel is called inside render(), no need to call again
+    }, 40);
   }
 
   function stop() {
