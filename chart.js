@@ -1,30 +1,22 @@
 (async function () {
   const d3sel = d3.select;
 
-
   
   // ---------- Create containers ----------
   const body = d3sel("body");
-  const wrap = body.append("div").attr("id", "wrap").style("max-width", "1100px").style("margin", "24px auto").style("padding", "0 16px");
+  const wrap = body.append("div").attr("id", "wrap");
 
-  const title = wrap.append("h2").text("Bitcoin Price vs Search Volume — Daily Trace")
-    .style("font-family", "system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif")
-    .style("margin", "4px 0 8px");
+  const title = wrap.append("h2").text("Bitcoin Price vs Search Volume — Daily Trace");
 
   const svg = wrap.append("svg")
     .attr("id", "chart")
     .attr("viewBox", "0 0 900 560")
-    .attr("width", "100%")
-    .style("background", "#fbfcffff")
-    .style("border-radius", "12px");
+    .attr("width", "100%");
 
-  const controls = wrap.append("div").style("display", "grid").style("grid-template-columns", "auto 1fr auto").style("gap", "12px").style("align-items", "center").style("margin-top", "10px");
-  const playBtn = controls.append("button").attr("id", "play").text("Play")
-    .style("padding", "8px 14px").style("border", "0").style("border-radius", "8px").style("background", "#7aa2ff").style("color", "#0b0e13").style("font-weight", "600").style("cursor", "pointer");
-
-  const scrub = controls.append("input").attr("id", "scrub").attr("type", "range").attr("min", 0).attr("max", 0).attr("value", 0).attr("step", 1).style("width", "100%");
-  const dateLabel = controls.append("div").attr("id", "dateLabel").text("—")
-    .style("text-align", "right").style("font-family", "system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif").style("color", "#9aa4b2");
+  const controls = wrap.append("div").attr("id", "controls");
+  const playBtn = controls.append("button").attr("id", "play").text("Play");
+  const scrub = controls.append("input").attr("id", "scrub").attr("type", "range").attr("min", 0).attr("max", 0).attr("value", 0).attr("step", 1);
+  const dateLabel = controls.append("div").attr("id", "dateLabel").text("—");
 
 
 
@@ -43,21 +35,40 @@
   const gridX = g.append("g").attr("class", "gridX").attr("transform", `translate(0,${innerH})`);
   const gridY = g.append("g").attr("class", "gridY");
 
-  g.append("text").attr("x", innerW).attr("y", innerH + 44).attr("text-anchor", "end").text("Search volume (daily)")
-    .style("fill", "#9aa4b2").style("font", "12px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif");
-  g.append("text").attr("x", -10).attr("y", -12).attr("text-anchor", "start").text("BTC price (USD)")
-    .style("fill", "#9aa4b2").style("font", "12px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif");
+  g.append("text").attr("x", -10).attr("y", -12).attr("text-anchor", "start").text("Volume (daily)")
+    .attr("class", "axis-label");
+  g.append("text").attr("y", innerH + 44).attr("x", -10).attr("text-anchor", "start").text("BTC price (USD)")
+    .attr("class", "axis-label");
 
-  const traces = g.append("g")
-  .attr("class", "traces")
-  .style("mix-blend-mode", "multiply");
+  // Dataset configurations
+  const datasets = [
+    { 
+      id: 1,
+      volumeField: 'volume1',
+      traceClass: 'traces traces1',
+      curveClass: 'curve curve1',
+      cursorClass: 'cursor cursor1'
+    },
+    { 
+      id: 2,
+      volumeField: 'volume2',
+      traceClass: 'traces traces2',
+      curveClass: 'curve curve2',
+      cursorClass: 'cursor cursor2'
+    }
+  ];
 
-  const cursor = g.append("circle")
-    .attr("r", 4.5)
-    .style("fill", "#ffd166")
-    .style("stroke", "#222")
-    .style("stroke-width", 1.25)
-    .style("opacity", 0);
+  // Create traces and cursors for each dataset
+  const traces = datasets.map(ds => 
+    g.append("g")
+      .attr("class", ds.traceClass)
+  );
+
+  const cursors = datasets.map(ds =>
+    g.append("circle")
+      .attr("class", ds.cursorClass)
+      .attr("r", 4.5)
+  );
 
 
 
@@ -66,8 +77,9 @@
   data = data.map(d => ({
     date: d.date instanceof Date ? d.date : new Date(d.date),
     price: +d.close,
-    volume: +d.bitcoin_scaled
-  })).filter(d => Number.isFinite(d.price) && Number.isFinite(d.volume) && d.date)
+    volume1: +d.bitcoin,
+    volume2: d.bitcoin_price
+  })).filter(d => Number.isFinite(d.price) && Number.isFinite(d.volume1) && d.date)
     .sort((a, b) => a.date - b.date);
 
   if (!data.length) {
@@ -80,7 +92,7 @@
 
 
   // ---------- Scales & axes ----------
-  const xExtent = d3.extent(data, d => d.volume);
+  const xExtent = d3.extent(data, d => d.volume1);
   const yExtent = d3.extent(data, d => d.price);
   const xPad = (xExtent[1] - xExtent[0]) * 0.06 || 1;
   const yPad = (yExtent[1] - yExtent[0]) * 0.08 || 1;
@@ -95,17 +107,13 @@
   //   .range([0, innerW]);
 
   const x = d3.scaleLog()
-  .domain([xMin, xMax])
+  .domain([yMin, yMax])
   .range([0, innerW])
   .base(10)
   .clamp(true); 
 
-  // const y = d3.scaleLinear()
-  //   .domain([yMin, yMax])
-  //   .range([innerH, 0]);
-
   const y = d3.scaleLog()
-  .domain([yMin, yMax])
+  .domain([xMin, xMax])
   .range([innerH, 0])
   .base(10)
   .clamp(true); 
@@ -114,15 +122,16 @@
   gx.call(d3.axisBottom(x).ticks(8).tickSizeOuter(0));
   gy.call(d3.axisLeft(y).ticks(8).tickSizeOuter(0));
 
-  gridX.call(d3.axisBottom(x).ticks(8).tickSize(innerH).tickFormat("")).selectAll("line").attr("stroke", "#1c2230").attr("stroke-width", 0.3);
-  gridY.call(d3.axisLeft(y).ticks(8).tickSize(-innerW).tickFormat("")).selectAll("line").attr("stroke", "#1c2230").attr("stroke-width", 0.3);
-  g.selectAll(".x path,.x line,.y path,.y line").attr("stroke", "#000000ff");
-  g.selectAll(".x text,.y text").attr("fill", "#000000ff").style("font", "12px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif");
+  gridX.call(d3.axisBottom(x).ticks(8).tickSize(innerH).tickFormat(""));
+  gridY.call(d3.axisLeft(y).ticks(8).tickSize(-innerW).tickFormat(""));
 
-  const makeCurve = d3.line()
-  .x(d => x(d.volume))    
-  .y(d => y(d.price))
-  .curve(d3.curveCatmullRom.alpha(0.5));
+  // Create line generators for each dataset
+  const makeCurves = datasets.map(ds => 
+    d3.line()
+      .x(d => x(d.price))
+      .y(d => y(d[ds.volumeField]))
+      .curve(d3.curveCatmullRom.alpha(0.5))
+  );
 
 
 
@@ -131,7 +140,12 @@
 
   const fmtDate = d3.timeFormat("%Y-%m-%d");
   function updateLabel(d) {
-    dateLabel.text(d ? `${fmtDate(d.date)} — $${d3.format(",")(Math.round(d.price))} · vol ${d.volume}` : "—");
+    if (!d) {
+      dateLabel.text("—");
+      return;
+    }
+    const volumes = datasets.map(ds => `vol${ds.id} ${d[ds.volumeField]}`).join(" · ");
+    dateLabel.text(`${fmtDate(d.date)} — $${d3.format(",")(Math.round(d.price))} · ${volumes}`);
   }
 
   function render(index) {
@@ -141,25 +155,26 @@
     return data.slice(start, i + 1);
   });
 
-  const segs = traces.selectAll("path").data(windows);
-  segs.join(
-    enter => enter.append("path")
-      .attr("class", "curve")
-      .attr("d", makeCurve)
-      .style("fill", "none")
-      .style("stroke", "#ff0000ff")
-      .style("stroke-width", 3)
-      .style("stroke-linecap", "round")
-      .style("stroke-linejoin", "round")
-      .style("opacity", 0.2),
-    update => update.attr("d", makeCurve),
-    exit => exit.remove()
-  );
+  // Render all datasets
+  datasets.forEach((ds, i) => {
+    const segs = traces[i].selectAll("path").data(windows);
+    segs.join(
+      enter => enter.append("path")
+        .attr("class", ds.curveClass)
+        .attr("d", makeCurves[i]),
+      update => update.attr("d", makeCurves[i]),
+      exit => exit.remove()
+    );
+  });
 
   const d = data[index];
-  cursor.attr("cx", x(d.volume)) // or x(d.price_change)
-        .attr("cy", y(d.price))
-        .style("opacity", 1);
+  // Update all cursors
+  datasets.forEach((ds, i) => {
+    cursors[i]
+      .attr("cx", x(d.price))
+      .attr("cy", y(d[ds.volumeField]))
+      .style("opacity", 1);
+  });
   updateLabel(d);
 }
 
@@ -203,7 +218,12 @@
       i = next;
       scrub.property("value", i);
       const d = data[i];
-      cursor.attr("cx", x(d.volume)).attr("cy", y(d.price));
+      // Update all cursors
+      datasets.forEach((ds, i) => {
+        cursors[i]
+          .attr("cx", x(d.price))
+          .attr("cy", y(d[ds.volumeField]));
+      });
       updateLabel(d);
     }, 280);
   }
