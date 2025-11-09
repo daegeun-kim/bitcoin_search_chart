@@ -92,6 +92,26 @@
       .attr("r", 4.5)
   );
 
+  // map internal volumeField names to actual CSV keyword/display names
+  const FIELD_NAMES = {
+    volume1: 'bitcoin',
+    volume2: 'bitcoin price',
+    volume3: 'nft',
+    volume4: 'blockchain'
+  };
+
+  // create small text labels that will follow each cursor (minimal, non-intrusive)
+  const labels = datasets.map(ds =>
+    g.append("text")
+      .attr("class", "cursor-label")
+      .attr("dx", 8)
+      .attr("dy", -8)
+      .style("font-size", "12px")
+      .style("fill", "white")
+      .style("opacity", 0)
+      .text(FIELD_NAMES[ds.volumeField] || ds.volumeField)
+  );
+
 
 
   // ---------- Load data ----------
@@ -209,6 +229,13 @@
       .attr("cx", x(d.price))
       .attr("cy", y(d[ds.volumeField]))
       .style("opacity", 1);
+    // position the label next to the cursor
+    if (labels && labels[i]) {
+      labels[i]
+        .attr("x", x(d.price))
+        .attr("y", y(d[ds.volumeField]))
+        .style("opacity", 1);
+    }
   });
   updateLabel(d);
 }
