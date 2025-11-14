@@ -1,13 +1,15 @@
-/* Dark mode base colors */
 body {
-    background: #292b30; /* deep dark blue */
-    color: #ffffff;      /* default text color */
+    background: #292b30;
+    color: #ffffff; 
     margin: 0;
-    overflow: hidden; /* disable page scrolling; chart will handle scroll-to-time */
+    overflow: hidden;
     font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* container: horizontal split (chart 70% / storyline 30%) */
+
+/* --------------------------------------- */
+/* --------- chart and storyline --------- */
+/* --------------------------------------- */
 .container {
     display: flex;
     flex-direction: row;
@@ -19,33 +21,31 @@ body {
     box-sizing: border-box;
 }
 .chart {
-    flex: 0 0 70%; /* take up 70% of available width */
+    flex: 0 0 70%;
     box-sizing: border-box;
     padding-right: 5px;
     min-width: 320px;
 }
 
-/* Make the SVG fill the available vertical space inside the chart column */
 .chart svg {
     width: 100%;
-    height: calc(100vh - 170px); /* leave room for padding, title and controls */
+    height: calc(100vh - 170px);
     display: block;
 }
 
 .storyline {
-    flex: 0 0 30%; /* take up 30% of available width */
+    flex: 0 0 30%;
     padding: 60px 0 30px;
     font-size: 17px;
     box-sizing: border-box;
     padding-left: 5px;
     max-width: 420px;
     line-height: 1.6;
-    color: #f3f7ff; /* light text for readability */
+    color: #f3f7ff;
     overflow-y: auto;
     max-height: calc(100vh - 80px);
 }
 
-/* Responsive: stack vertically on narrow viewports */
 @media (max-width: 900px) {
     .container {
         flex-direction: column;
@@ -64,37 +64,25 @@ body {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-/* Container Layout */
+/* --------------------------------------- */
+/* --------- chart elements -------------- */
+/* --------------------------------------- */
 #wrap {
     max-width: 1100px;
     margin: 24px auto;
     padding: 0 16px;
 }
 
-/* Title Typography */
 h2 {
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
     margin: 4px 0 8px;
 }
 
-/* Chart SVG */
 #chart {
-    background: #1b1d22; /* dark blue panel */
+    background: #1b1d22;
     border-radius: 12px;
 }
 
-/* Controls Container */
 #controls {
     display: grid;
     grid-template-columns: auto 1fr auto;
@@ -103,7 +91,6 @@ h2 {
     margin-top: 10px;
 }
 
-/* Play Button */
 #play {
     padding: 8px 14px;
     border: 0;
@@ -114,19 +101,16 @@ h2 {
     cursor: pointer;
 }
 
-/* Scrubber Input */
 #scrub {
     width: 100%;
 }
 
-/* Date Label */
 #dateLabel {
     text-align: right;
     font-family: inherit;
     color: rgba(255,255,255,0.85);
 }
 
-/* Chart Axis and Labels */
 .x text,
 .y text {
     fill: #ffffff;
@@ -182,7 +166,6 @@ h2 {
     stroke: #222;
 }
 
-/* Alternate (second) series styles */
 .curve2 {
     fill: none;
     stroke: #348ee2;
@@ -194,15 +177,14 @@ h2 {
 
 .cursor2 {
     fill: #7dd3fc;
-    stroke: #0b1726; /* darker stroke for contrast */
+    stroke: #0b1726; 
     stroke-width: 1.25;
     opacity: 0;
 }
 
-/* Third series styles */
 .curve3 {
     fill: none;
-    stroke: #44992f; /* green */
+    stroke: #44992f;
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
@@ -210,16 +192,15 @@ h2 {
 }
 
 .cursor3 {
-    fill: #78d475; /* light green */
+    fill: #78d475; 
     stroke: #042a14;
     stroke-width: 1.25;
     opacity: 0;
 }
 
-/* Fourth series styles */
 .curve4 {
     fill: none;
-    stroke: #f32929; /* purple */
+    stroke: #f32929; 
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
@@ -227,8 +208,24 @@ h2 {
 }
 
 .cursor4 {
-    fill: #fc5f5f; /* light purple */
+    fill: #fc5f5f; 
     stroke: #1a0b0b;
     stroke-width: 1.25;
     opacity: 0;
+}
+
+
+
+
+
+/* --------------------------------------- */
+/* --------- storyline ------------------- */
+/* --------------------------------------- */
+.story {
+    font-size: 17px;
+}
+
+#intro-title1 {
+    font-size: 16px;
+    font-weight: 600;
 }

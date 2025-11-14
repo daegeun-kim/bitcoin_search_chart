@@ -1,10 +1,12 @@
 (async function () {
   const d3sel = d3.select;
 
-  
+
+
+
+  // ---------------------------------------
   // ---------- Create containers ----------
-  // Prefer placing the chart inside the existing <div class="chart"> in index.html.
-  // If that element isn't present, fall back to appending to the body.
+  // ---------------------------------------
   let container = d3sel("div.chart");
   if (container.empty()) container = d3sel("body");
   const wrap = container.append("div").attr("id", "wrap");
@@ -23,8 +25,11 @@
 
 
 
-  // ---------- Dimensions ----------
-  // Use margins to define the graph area within the SVG viewBox
+
+
+  // ---------------------------------------
+  // ---------- Dimensions -----------------
+  // ---------------------------------------
   const M = { top: 25, right: 40, bottom: 50, left: 40 };
   const viewBox = svg.node().viewBox.baseVal;
   const innerW = viewBox.width - M.left - M.right;
@@ -32,7 +37,11 @@
 
 
 
-  // ---------- Groups ----------
+
+
+  // ---------------------------------------
+  // ---------- Groups ---------------------
+  // ---------------------------------------
   const g = svg.append("g").attr("transform", `translate(${M.left},${M.top})`);
   const gx = g.append("g").attr("class", "x").attr("transform", `translate(0,${innerH})`);
   const gy = g.append("g").attr("class", "y");
@@ -44,16 +53,13 @@
   g.append("text").attr("y", innerH + 44).attr("x", -10).attr("text-anchor", "start").text("BTC price (USD)")
     .attr("class", "axis-label");
 
-  // Dataset configurations (four series: volume1, volume2, volume3, volume4)
+
+
+
+  // ---------------------------------------
+  // ---------- Dataset Config -------------
+  // ---------------------------------------
   const datasets = [
-    // { 
-    //   id: 1,
-    //   volumeField: 'volume1',
-    //   traceClass: 'traces traces1',
-    //   curveClass: 'curve curve1',
-    //   cursorClass: 'cursor cursor1',
-    //   baseOpacity: 0.4
-    // },
     { 
       id: 2,
       volumeField: 'volume2',
@@ -80,7 +86,9 @@
     }
   ];
 
-  // Create traces and cursors for each dataset
+  // --------------------------------------------------
+  // Creating traces and cursors for each dataset -----
+  // --------------------------------------------------
   const traces = datasets.map(ds => 
     g.append("g")
       .attr("class", ds.traceClass)
@@ -92,15 +100,19 @@
       .attr("r", 4.5)
   );
 
-  // map internal volumeField names to actual CSV keyword/display names
+
+
+
+
+
+  // --------------------------------------------------
+  // ------- text annotation next to cursor -----------
+  // --------------------------------------------------
   const FIELD_NAMES = {
-    volume1: 'bitcoin',
     volume2: 'bitcoin price',
     volume3: 'nft',
     volume4: 'blockchain'
   };
-
-  // create small text labels that will follow each cursor (minimal, non-intrusive)
   const labels = datasets.map(ds =>
     g.append("text")
       .attr("class", "cursor-label")
@@ -114,7 +126,11 @@
 
 
 
-  // ---------- Load data ----------
+
+
+  // --------------------------------------------------
+  // ------- load csv data ----------------------------
+  // --------------------------------------------------
   let data = await d3.csv("btc_data_daily_scaled.csv", d3.autoType);
   data = data.map(d => ({
     date: d.date instanceof Date ? d.date : new Date(d.date),
@@ -135,7 +151,11 @@
 
 
 
-  // ---------- Scales & axes ----------
+
+
+  // --------------------------------------------------
+  // ------- scale and axis ---------------------------
+  // --------------------------------------------------
   const xExtent = d3.extent(data, d => d.volume1);
   const yExtent = d3.extent(data, d => d.price);
   const xPad = (xExtent[1] - xExtent[0]) * 0.06 || 1;
@@ -166,11 +186,9 @@
   gx.call(d3.axisBottom(x).ticks(8).tickSizeOuter(0));
   gy.call(d3.axisLeft(y).ticks(8).tickSizeOuter(0));
 
-  // draw grid lines upward into the chart area; use negative tickSize so lines do not extend below the x axis
   gridX.call(d3.axisBottom(x).ticks(8).tickSize(-innerH).tickFormat(""));
   gridY.call(d3.axisLeft(y).ticks(8).tickSize(-innerW).tickFormat(""));
 
-  // Create line generators for each dataset
   const makeCurves = datasets.map(ds => 
     d3.line()
       .x(d => x(d.price))
@@ -180,7 +198,11 @@
 
 
 
-  // ---------- Slider setup ----------
+
+
+  // --------------------------------------------------
+  // ------- slider setup -----------------------------
+  // --------------------------------------------------
   scrub.attr("max", Math.max(0, data.length - 1)).property("value", 0);
 
   const fmtDate = d3.timeFormat("%Y-%m-%d");
@@ -189,15 +211,12 @@
   }
 
   function render(index) {
-  // windows like [d0,d1], [d0,d1,d2], [d1,d2,d3], ... up to index
   const windows = d3.range(1, index + 1).map(i => {
-    const start = Math.max(0, i - 1);     // 3-point window
+    const start = Math.max(0, i - 1);
     return data.slice(start, i + 1);
   });
 
   const isLastDate = data[index]?.date?.getTime() === new Date('2024-12-31').getTime();
-
-  // Render all datasets
   datasets.forEach((ds, i) => {
     const segs = traces[i].selectAll("path").data(windows);
     segs.join(
@@ -223,7 +242,6 @@
   });
 
   const d = data[index];
-  // Update all cursors
   datasets.forEach((ds, i) => {
     cursors[i]
       .attr("cx", x(d.price))
@@ -263,7 +281,14 @@
   // Initial render
   render(0);
 
-  // ---------- Wheel / scroll interaction ----------
+
+
+
+
+  
+  // --------------------------------------------------
+  // ---------- Wheel / scroll interaction ------------
+  // --------------------------------------------------
   // Use wheel scrolling to move the time forward/backward when not over the storyline.
   // Allow the storyline element to scroll normally when the pointer is over it.
   // Implement accumulation + sensitivity so touchpad and mouse wheel move time faster.
@@ -272,26 +297,17 @@
   let wheelAccum = 0;
 
   function onWheelMove(e) {
-    // If pointer is inside the storyline, let that element handle scrolling
     if (e.target && e.target.closest && e.target.closest('.storyline')) {
       return; // do not intercept
     }
-    // prevent the default page scroll
     e.preventDefault();
-
-    // accumulate raw deltaY (works better for smooth touchpads)
     wheelAccum += e.deltaY;
 
-    // compute number of threshold-crossings
     const crosses = Math.trunc(wheelAccum / WHEEL_THRESHOLD);
     if (crosses === 0) return; // not enough movement yet
 
-    // apply sensitivity multiplier
     const step = crosses * WHEEL_SENSITIVITY;
-
-    // reset accumulation keeping the remainder
     wheelAccum = wheelAccum - crosses * WHEEL_THRESHOLD;
-
     let i = +scrub.property('value');
     i = Math.max(0, Math.min(data.length - 1, i + step));
     if (i !== +scrub.property('value')) {
@@ -299,14 +315,16 @@
       render(i);
     }
   }
-
-  // Attach wheel listener to the window so it works without page scrolling.
-  // Use passive: false so we can preventDefault.
   window.addEventListener('wheel', onWheelMove, { passive: false });
 
 
 
-  // ---------- Interactions ----------
+
+
+
+  // --------------------------------------------------
+  // ---------- Interactions & Play button ------------
+  // --------------------------------------------------
   let timer = null;
   function play() {
     if (timer) return;
@@ -314,25 +332,21 @@
     scrub.attr("disabled", true);
 
     let i = +scrub.property("value");
-    // advance one day every 500ms; use render() to draw safe segments
     timer = d3.interval(() => {
       if (i >= data.length - 1) { stop(); return; }
       const next = i + 1;
       i = next;
       scrub.property("value", i);
-      // render the chart up to next index (safe, does not rely on external undefined vars)
       render(i);
       const d = data[i];
-      // animate cursors smoothly to their new positions
       datasets.forEach((ds, idx) => {
         cursors[idx]
           .transition()
-          .duration(450)
+          .duration(150)
           .ease(d3.easeCubicOut)
           .attr("cx", x(d.price))
           .attr("cy", y(d[ds.volumeField]));
       });
-      // updateLabel is called inside render(), no need to call again
     }, 40);
   }
 
