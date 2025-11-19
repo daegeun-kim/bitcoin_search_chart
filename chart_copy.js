@@ -1,11 +1,7 @@
 (async function () {
   const d3sel = d3.select;
 
-  const timeSpeed = 40; // lower is faster
-  const cursorRadius = 4.5;
-  const traceOpacity = 0.15;
-  const traceWidth = 1.8;
-  const pauseTime = 3000;
+
 
 
   // ---------------------------------------
@@ -15,9 +11,7 @@
   if (container.empty()) container = d3sel("body");
   const wrap = container.append("div").attr("id", "wrap");
 
-  const title = wrap.append("h2")
-  .attr("class", "chart-title")
-  .text("Bitcoin Price vs Keyword Search Volume : Daily Trace");
+  const title = wrap.append("h2").text("Bitcoin Price vs Search Volume — Daily Trace");
 
   const svg = wrap.append("svg")
     .attr("id", "chart")
@@ -103,7 +97,7 @@
   const cursors = datasets.map(ds =>
     g.append("circle")
       .attr("class", ds.cursorClass)
-      .attr("r", cursorRadius)
+      .attr("r", 4.5)
   );
 
 
@@ -171,7 +165,7 @@
 
   const yMin = 0.1; 
   const yMax = 3; 
-  const xMin = 200;   
+  const xMin = 100;   
   const xMax = 1000;
 
   // const x = d3.scaleLinear()
@@ -194,7 +188,7 @@
   // .domain([yMin, yMax])
   // .range([innerH, 0]);
   gx.call(d3.axisBottom(x).ticks(8).tickSizeOuter(0));
-  gy.call(d3.axisLeft(y).ticks(8).tickSizeOuter(0).tickFormat((d, i) => (i % 2 === 1 ? d3.format(".1f")(d) : "")));
+  gy.call(d3.axisLeft(y).ticks(8).tickSizeOuter(0));
 
   gridX.call(d3.axisBottom(x).ticks(8).tickSize(-innerH).tickFormat(""));
   gridY.call(d3.axisLeft(y).ticks(8).tickSize(-innerW).tickFormat(""));
@@ -205,8 +199,8 @@
     const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     if (d >= new Date('2015-01-01') && d <= new Date('2016-12-31')) return { xMax: 1000, yMax: 3 };
     if (d >= new Date('2017-01-01') && d <= new Date('2017-12-31')) return { xMax: 20000, yMax: 80 };
-    if (d >= new Date('2018-01-01') && d <= new Date('2021-01-02')) return { xMax: 40000, yMax: 80 };
-    if (d >= new Date('2021-01-03') && d <= new Date('2022-12-31')) return { xMax: 70000, yMax: 100 };
+    if (d >= new Date('2018-01-01') && d <= new Date('2020-12-31')) return { xMax: 30000, yMax: 80 };
+    if (d >= new Date('2021-01-01') && d <= new Date('2022-12-31')) return { xMax: 70000, yMax: 100 };
     if (d >= new Date('2023-01-01') && d <= new Date('2024-12-31')) return { xMax: 100000, yMax: 100 };
     return { xMax: xMax, yMax: yMax };
   }
@@ -230,9 +224,7 @@
   // --------------------------------------------------
   scrub.attr("max", Math.max(0, data.length - 1)).property("value", 0);
 
-  const transitionTime = 1000; // milliseconds for smooth transitions (axes, traces, cursors, labels)
-
-  const fmtDate = d3.utcFormat("%Y-%m-%d");
+  const fmtDate = d3.timeFormat("%Y-%m-%d");
   function updateLabel(d) {
     dateLabel.text(d ? fmtDate(d.date) : "—");
   }
@@ -251,7 +243,7 @@
 
   // animate axes & grids with transition
   gx.transition(t).call(d3.axisBottom(x).ticks(8).tickSizeOuter(0));
-  gy.transition(t).call(d3.axisLeft(y).ticks(8).tickSizeOuter(0).tickFormat((d, i) => (i % 2 === 1 ? d3.format(".1f")(d) : "")));
+  gy.transition(t).call(d3.axisLeft(y).ticks(8).tickSizeOuter(0));
   gridX.transition(t).call(d3.axisBottom(x).ticks(8).tickSize(-innerH).tickFormat(""));
   gridY.transition(t).call(d3.axisLeft(y).ticks(8).tickSize(-innerW).tickFormat(""));
 
@@ -306,22 +298,20 @@
       enter => enter.append("path")
         .attr("class", ds.curveClass)
         .attr("d", makeCurves[i])
-        .style("stroke-width", traceWidth)
         .style("opacity", (d, j) => {
-          if (isLastDate) return traceOpacity;
+          if (isLastDate) return 0.2;
           const segEnd = j + 1;
           const age = index - segEnd;
-          return Math.max(0, ds.baseOpacity - age * 0.002);
+          return Math.max(0.05, ds.baseOpacity - age * 0.002);
         }),
       update => update
         .transition(t)
         .attr("d", makeCurves[i])
-        .style("stroke-width", traceWidth)
         .style("opacity", (d, j) => {
-          if (isLastDate) return traceOpacity;
+          if (isLastDate) return 0.2;
           const segEnd = j + 1;
           const age = index - segEnd;
-          return Math.max(0, ds.baseOpacity - age * 0.002);
+          return Math.max(0.05, ds.baseOpacity - age * 0.002);
         }),
       exit => exit.remove()
     );
@@ -357,7 +347,7 @@
       .attr("stroke-dasharray", `${targetLen} ${Math.max(1, L - targetLen)}`)
       .attr("stroke-dashoffset", 0)
       .transition()
-      .duration(duration)  
+      .duration(duration)
       .ease(d3.easeCubicOut)
       .attr("stroke-dasharray", `${L} 0`)
       .on("end", () => tracePath.attr("stroke-dasharray", null));
@@ -376,6 +366,7 @@
   // --------------------------------------------------
   // ---------- Transition & Interaction Config ------
   // --------------------------------------------------
+  const transitionTime = 1000; // milliseconds for smooth transitions (axes, traces, cursors, labels)
 
   // ---------- Wheel / scroll interaction ------------
   // --------------------------------------------------
@@ -540,7 +531,7 @@
       if (fromPlayLoop && !pause20160525Done && currentDate >= d20160525) {
         pause20160525Done = true;
         stop();
-        setTimeout(() => { if (!timer) play(); }, pauseTime); // pause time
+        setTimeout(() => { if (!timer) play(); }, 8000);
       }
       return;
     }
@@ -567,7 +558,7 @@
       if (fromPlayLoop && !pause20171130Done && currentDate >= d20171130) {
         pause20171130Done = true;
         stop();
-        setTimeout(() => { if (!timer) play(); }, pauseTime);
+        setTimeout(() => { if (!timer) play(); }, 8000);
       }
       return;
     }
@@ -615,7 +606,7 @@
       if (fromPlayLoop && !pause20201216Done && currentDate >= d20201216) {
         pause20201216Done = true;
         stop();
-        setTimeout(() => { if (!timer) play(); }, pauseTime);
+        setTimeout(() => { if (!timer) play(); }, 8000);
       }
       return;
     }
@@ -642,7 +633,7 @@
       if (fromPlayLoop && !pause20210101Done && currentDate >= d20210101) {
         pause20210101Done = true;
         stop();
-        setTimeout(() => { if (!timer) play(); }, pauseTime);
+        setTimeout(() => { if (!timer) play(); }, 8000);
       }
       return;
     }
@@ -669,7 +660,7 @@
       if (fromPlayLoop && !pause20210311Done && currentDate >= d20210311) {
         pause20210311Done = true;
         stop();
-        setTimeout(() => { if (!timer) play(); }, pauseTime);
+        setTimeout(() => { if (!timer) play(); }, 8000);
       }
       return;
     }
@@ -696,7 +687,7 @@
       if (fromPlayLoop && !pause20220901Done && currentDate >= d20220901) {
         pause20220901Done = true;
         stop();
-        setTimeout(() => { if (!timer) play(); }, pauseTime);
+        setTimeout(() => { if (!timer) play(); }, 8000);
       }
       return;
     }
@@ -723,7 +714,7 @@
       if (fromPlayLoop && !pause20241217Done && currentDate >= d20241217) {
         pause20241217Done = true;
         stop();
-        setTimeout(() => { if (!timer) play(); }, pauseTime);
+        setTimeout(() => { if (!timer) play(); }, 8000);
       }
       return;
     }
@@ -749,7 +740,16 @@
       const d = data[i];
       // Update storyline & handle pauses at milestone dates
       updateStoryForDate(d.date, true);
-    }, timeSpeed);
+
+      datasets.forEach((ds, idx) => {
+        cursors[idx]
+          .transition()
+          .duration(transitionTime)
+          .ease(d3.easeCubicOut)
+          .attr("cx", x(d.price))
+          .attr("cy", y(d[ds.volumeField]));
+      });
+    }, 40);
   }
 
   function stop() {

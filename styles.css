@@ -1,5 +1,5 @@
 body {
-    background: #292b30;
+    background: #17191e;
     color: #ffffff; 
     margin: 0;
     overflow: hidden;
@@ -16,7 +16,7 @@ body {
     align-items: flex-start;
     justify-content: center;
     width: 100%;
-    gap: 24px;
+    gap: 14px;
     padding: 10px;
     box-sizing: border-box;
 }
@@ -25,6 +25,15 @@ body {
     box-sizing: border-box;
     padding-right: 5px;
     min-width: 320px;
+}
+.chart-title {
+    font-size: 40px;
+    font-weight: 700;
+    font-weight: 600;
+    color: white;
+    margin: 0 0 10px 0;
+    padding: 0;
+    text-align: left; /* or center, depending on your layout */
 }
 
 .chart svg {
@@ -35,7 +44,8 @@ body {
 
 .storyline {
     flex: 0 0 30%;
-    padding: 60px 0 30px;
+    padding: 0px 0 30px;
+    margin-top: 60px;
     font-size: 17px;
     box-sizing: border-box;
     padding-left: 5px;
@@ -45,6 +55,7 @@ body {
     overflow-y: auto;
     max-height: calc(100vh - 80px);
 }
+
 
 @media (max-width: 900px) {
     .container {
@@ -79,7 +90,8 @@ h2 {
 }
 
 #chart {
-    background: #1b1d22;
+    /* background: #1b1d22; */
+    background: #17191e;
     border-radius: 12px;
 }
 
@@ -223,9 +235,32 @@ h2 {
 /* --------------------------------------- */
 .story {
     font-size: 17px;
+    font-weight: 600;
+    color: #ffffff;
 }
 
-#intro-title1 {
-    font-size: 16px;
+.title {
+    font-size: 30px;
     font-weight: 600;
+    color: #ffffff;
+}
+
+.intro {
+    font-size: 18px;
+    font-weight: 400;
+    color: #ffffff;
+    line-height: 2;
+}
+
+.news {
+    font-size: 15px;
+    font-weight: 400;
+    color: #ffffff;
+    
+}
+
+#news-title1 {
+    font-size: 17px;
+    font-weight: 600;
+    color: #ff0000;
 }
