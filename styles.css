@@ -25,6 +25,7 @@ body {
     box-sizing: border-box;
     padding-right: 5px;
     min-width: 320px;
+    /* margin: 30px 0 100px 0; */
 }
 .chart-title {
     font-size: 40px;
@@ -49,7 +50,7 @@ body {
     box-sizing: border-box;
     padding-left: 5px;
     max-width: 420px;
-    line-height: 1.6;
+    line-height: 1;
     color: #f3f7ff;
     overflow-y: auto;
     max-height: calc(100vh - 80px);
@@ -92,6 +93,7 @@ h2 {
     /* background: #1b1d22; */
     background: #17191e;
     border-radius: 12px;
+    height: 700px;
 }
 
 #controls {
@@ -238,17 +240,11 @@ h2 {
     color: #ffffff;
 }
 
-.title {
-    font-size: 30px;
-    font-weight: 600;
-    color: #ffffff;
-}
-
 .intro {
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 400;
     color: #ffffff;
-    line-height: 2;
+    line-height: 1.5;
 }
 
 .news {
@@ -262,4 +258,14 @@ h2 {
     font-size: 17px;
     font-weight: 600;
     color: #ff0000;
+}
+
+#toggle-y-scale {
+    padding: 8px 14px;
+    border: 0;
+    border-radius: 8px;
+    background: #97c0e7;
+    color: #0b0e13;
+    font-weight: 600;
+    cursor: pointer;
 }
