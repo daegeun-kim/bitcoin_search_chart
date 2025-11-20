@@ -311,7 +311,7 @@
           if (isLastDate) return traceOpacity;
           const segEnd = j + 1;
           const age = index - segEnd;
-          return Math.max(0, ds.baseOpacity - age * 0.002);
+          return Math.max(0.02, ds.baseOpacity - age * 0.002);
         }),
       update => update
         .transition(t)
@@ -321,7 +321,7 @@
           if (isLastDate) return traceOpacity;
           const segEnd = j + 1;
           const age = index - segEnd;
-          return Math.max(0, ds.baseOpacity - age * 0.002);
+          return Math.max(0.02, ds.baseOpacity - age * 0.002);
         }),
       exit => exit.remove()
     );
@@ -412,7 +412,7 @@
 
 
 
-     // --------------------------------------------------
+  // --------------------------------------------------
   // ---------- Interactions & Play button ------------
   // --------------------------------------------------
   const storylineEl = d3sel(".storyline");
