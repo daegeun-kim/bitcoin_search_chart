@@ -5,7 +5,7 @@
   const cursorRadius = 4.5;
   const traceOpacity = 0.15;
   const traceWidth = 1.8;
-  const pauseTime = 3000;
+  const pauseTime = 5000;
 
   let container = d3sel("div.chart");
   if (container.empty()) container = d3sel("body");
@@ -23,7 +23,7 @@
   const controls = wrap.append("div").attr("id", "controls");
   const playBtn = controls.append("button").attr("id", "play").text("Play");
   const scrub = controls.append("input").attr("id", "scrub").attr("type", "range").attr("min", 0).attr("max", 0).attr("value", 0).attr("step", 1);
-  const yToggleBtn = controls.append("button").attr("id", "toggle-y-scale").text("Y: Linear");
+  const yToggleBtn = controls.append("button").attr("id", "toggle-y-scale").text("Linear");
   const dateLabel = controls.append("div").attr("id", "dateLabel").text("—");
 
   const M = { top: 25, right: 40, bottom: 50, left: 40 };
@@ -682,6 +682,6 @@
     const i = +scrub.property("value");
     render(i);
 
-    yToggleBtn.text(yScaleType === "linear" ? "Y: Linear" : "Y: Log");
+    yToggleBtn.text(yScaleType === "linear" ? "Linear" : "Log");
   });
 })();
