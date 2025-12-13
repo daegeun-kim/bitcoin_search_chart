@@ -1,271 +1,51 @@
 body {
     background: #17191e;
-    color: #ffffff; 
-    margin: 0;
-    overflow: hidden;
+    padding-top: 100px;
+    width: 1000px;
+    margin: 0 auto;
+    color: #ffffff;
+    overflow-x: hidden;
+    overflow-y: auto;
     font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
-
-/* --------------------------------------- */
-/* --------- chart and storyline --------- */
-/* --------------------------------------- */
-.container {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: center;
-    width: 100%;
-    gap: 14px;
-    padding: 10px;
-    box-sizing: border-box;
-}
-.chart {
-    flex: 0 0 70%;
-    box-sizing: border-box;
-    padding-right: 5px;
-    min-width: 320px;
-    /* margin: 30px 0 100px 0; */
-}
-.chart-title {
-    font-size: 40px;
+#title {
+    font-size: 50px;
     font-weight: 700;
-    color: white;
-    margin: 0 0 10px 0;
-    padding: 0 0 0 40px;
-    text-align: left; /* or center, depending on your layout */
-}
-
-.chart svg {
-    width: 100%;
-    height: calc(100vh - 170px);
-    display: block;
-}
-
-.storyline {
-    flex: 0 0 30%;
-    padding: 0px 0 30px;
-    margin-top: 60px;
-    font-size: 17px;
-    box-sizing: border-box;
-    padding-left: 5px;
-    max-width: 420px;
-    line-height: 1;
-    color: #f3f7ff;
-    overflow-y: auto;
-    max-height: calc(100vh - 80px);
-}
-
-
-@media (max-width: 900px) {
-    .container {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .chart, .storyline {
-        flex: none;
-        width: 100%;
-        max-width: none;
-        padding: 0 8px;
-    }
-    .storyline {
-        max-height: none;
-    }
-}
-
-
-
-/* --------------------------------------- */
-/* --------- chart elements -------------- */
-/* --------------------------------------- */
-#wrap {
-    max-width: 1100px;
-    margin: 24px auto;
-    padding: 0 16px;
-}
-
-h2 {
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-    margin: 4px 0 8px;
-}
-
-#chart {
-    /* background: #1b1d22; */
-    background: #17191e;
-    border-radius: 12px;
-    height: 700px;
-}
-
-#controls {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 12px;
-    align-items: center;
-    margin: 10px 40px;
-}
-
-#play {
-    padding: 8px 14px;
-    border: 0;
-    border-radius: 8px;
-    background: #e0e0e0;
-    color: #0b0e13;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-#scrub {
-    width: 100%;
-}
-
-#dateLabel {
-    text-align: right;
-    font-family: inherit;
-    color: rgba(255,255,255,0.85);
-}
-
-.x text,
-.y text {
-    fill: #ffffff;
-    font: 12px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-}
-
-.x path,
-.y path {
-    stroke: rgba(105, 105, 105, 0.95);
-    stroke-width: 0.22;
-}
-
-.x line,
-.y line {
-    stroke: rgba(88, 88, 88, 0.9);
-    stroke-width: 0.3; 
-}
-
-.gridX line,
-.gridY line {
-    stroke: rgba(255,255,255,0.12);
-    stroke-width: 0.5;
-}
-
-.axis-label {
-    fill: rgba(255, 255, 255, 0.9);
-    font: 13px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-}
-
-.traces {
-    mix-blend-mode: normal;
-}
-
-.curve {
-    fill: none;
-    stroke-width: 3;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-
-.curve1 {
-    stroke: #ff0000;
-    stroke-opacity: 1;
-}
-
-.cursor {
-    stroke-width: 1.25;
-    opacity: 0;
-}
-
-.cursor1 {
-    fill: #ff0000;
-    stroke: #222;
-}
-
-.curve2 {
-    fill: none;
-    stroke: #348ee2;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-opacity: 1;
-}
-
-.cursor2 {
-    fill: #7dd3fc;
-    stroke: #0b1726; 
-    stroke-width: 1.25;
-    opacity: 0;
-}
-
-.curve3 {
-    fill: none;
-    stroke: #44992f;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-opacity: 1;
-}
-
-.cursor3 {
-    fill: #78d475; 
-    stroke: #042a14;
-    stroke-width: 1.25;
-    opacity: 0;
-}
-
-.curve4 {
-    fill: none;
-    stroke: #f32929; 
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-opacity: 1;
-}
-
-.cursor4 {
-    fill: #fc5f5f; 
-    stroke: #1a0b0b;
-    stroke-width: 1.25;
-    opacity: 0;
-}
-
-
-
-
-
-/* --------------------------------------- */
-/* --------- storyline ------------------- */
-/* --------------------------------------- */
-.story {
-    font-size: 17px;
-    font-weight: 600;
-    color: #ffffff;
-}
-
-.intro {
-    font-size: 17px;
-    font-weight: 400;
-    color: #ffffff;
     line-height: 1.5;
+    max-width: 800px;
+    color: #f3f7ff;
 }
 
-.news {
-    font-size: 15px;
-    font-weight: 400;
+#intro, #mainChart {
+    max-width: 800px;
+    font-size: 20px;
+    line-height: 1.6;
+    margin-top: 20px;
+    margin-bottom: 40px;
+    color: #d1d9e6;
+}
+
+#btc {
+    color: #00c2ff;
+}
+#blockchain {
+    color: #ff4d9d;
+}
+#nft {
+    color: #9cff57;
+}
+
+.mainchart-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    font-size: 36px;
+    background-color: #292b2f;
     color: #ffffff;
-    
-}
-
-#news-title1 {
-    font-size: 30px;
-    font-weight: 600;
-    color: #ff0000;
-}
-
-#toggle-y-scale {
-    padding: 8px 14px;
-    border: 0;
-    border-radius: 8px;
-    background: #97c0e7;
-    color: #0b0e13;
-    font-weight: 600;
+    border: none;
+    border-radius: 5px;
     cursor: pointer;
+    z-index: 1000;
 }
